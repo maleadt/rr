@@ -332,7 +332,6 @@ inline static long stored_record_size(size_t length) {
  */
 inline static int is_blacklisted_filename(const char* filename) {
   return !strncmp("/dev/dri/", filename, 9) ||
-         !strcmp("/dev/nvidiactl", filename) ||
          !strcmp("/usr/share/alsa/alsa.conf", filename);
 }
 

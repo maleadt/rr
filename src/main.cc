@@ -266,6 +266,5 @@ int main(int argc, char* argv[]) {
     }
     command = RecordCommand::get();
   }
-
   return command->run(args);
 }

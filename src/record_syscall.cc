@@ -64,6 +64,7 @@
 #include "TraceStream.h"
 #include "VirtualPerfCounterMonitor.h"
 #include "drm.h"
+#include "nvrm.h"
 #include "ftrace.h"
 #include "kernel_abi.h"
 #include "kernel_metadata.h"
@@ -1377,6 +1378,17 @@ static Switchable prepare_ioctl(RecordTask* t,
     case IOCTL_MASK_SIZE(VIDIOC_G_CTRL):
     case IOCTL_MASK_SIZE(VIDIOC_S_CTRL):
     case IOCTL_MASK_SIZE(VFAT_IOCTL_READDIR_BOTH):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_CHECK_VERSION_STR):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_CARD_INFO):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_ENV_INFO):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_DESTROY):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_CALL):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_MEMORY):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_HOST_MAP):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_HOST_UNMAP):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_UNK5E):   // contains ptr
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_CREATE_OS_EVENT):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_DESTROY_OS_EVENT):
       syscall_state.reg_parameter(3, size, IN_OUT);
       return PREVENT_SWITCH;
 
@@ -1415,6 +1427,14 @@ static Switchable prepare_ioctl(RecordTask* t,
       auto args = t->read_mem(argsp);
       syscall_state.mem_ptr_parameter(REMOTE_PTR_FIELD(argsp, data),
                                       args.wLength);
+      return PREVENT_SWITCH;
+    }
+
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_CREATE): {
+      auto argsp =
+          syscall_state.reg_parameter<typename Arch::nvrm_ioctl_create>(3, IN);
+      // TODO: does data size differ based on cls argument?
+      syscall_state.mem_ptr_parameter_inferred(REMOTE_PTR_FIELD(argsp, data));
       return PREVENT_SWITCH;
     }
   }

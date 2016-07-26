@@ -1253,6 +1253,17 @@ struct BaseArch : public wordsize,
   };
   RR_VERIFY_TYPE(snd_ctl_card_info);
 
+  struct nvrm_ioctl_create {
+    uint32_t cid;
+    uint32_t parent;
+    uint32_t handle;
+    uint32_t cls;
+    ptr<uint32_t> data;
+    uint32_t status;
+    uint32_t _pad;
+  };
+  RR_VERIFY_TYPE(nvrm_ioctl_create);
+
   struct usbdevfs_iso_packet_desc {
     unsigned int length;
     unsigned int actual_length;
