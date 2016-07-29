@@ -39,6 +39,7 @@ extern "C" {
 #endif
 
 #define NVRM_IOCTL_MAGIC 'F'
+#define NVRM_IO(nr) _IO(NVRM_IOCTL_MAGIC, nr)
 #define NVRM_IOR(nr, type) _IOR(NVRM_IOCTL_MAGIC, nr, type)
 #define NVRM_IOW(nr, type) _IOW(NVRM_IOCTL_MAGIC, nr, type)
 #define NVRM_IOWR(nr, type) _IOWR(NVRM_IOCTL_MAGIC, nr, type)
@@ -170,7 +171,7 @@ typedef struct nvrm_ioctl_call {
   uint32_t handle;
   uint32_t mthd;
   uint32_t _pad;
-  uint64_t ptr;
+  uint64_t addr;
   uint32_t size;
   uint32_t status;
 } nvrm_ioctl_call_t;
@@ -181,7 +182,7 @@ typedef struct nvrm_ioctl_create {
   uint32_t parent;
   uint32_t handle;
   uint32_t cls;
-  uint64_t ptr;
+  uint64_t addr;
   uint32_t status;
   uint32_t _pad;
 } nvrm_ioctl_create_t;

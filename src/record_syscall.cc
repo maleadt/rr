@@ -65,6 +65,7 @@
 #include "VirtualPerfCounterMonitor.h"
 #include "drm.h"
 #include "nvidia/nvrm.h"
+#include "nvidia/uvm.h"
 #include "ftrace.h"
 #include "kernel_abi.h"
 #include "kernel_metadata.h"
@@ -1283,6 +1284,19 @@ static Switchable prepare_ioctl(RecordTask* t,
     case SNDRV_CTL_IOCTL_CARD_INFO:
       syscall_state.reg_parameter<typename Arch::snd_ctl_card_info>(3);
       return PREVENT_SWITCH;
+
+    case UVM_IOCTL_INITIALIZE:
+      syscall_state.reg_parameter<uvm_initialize_t>(3, OUT);
+      return PREVENT_SWITCH;
+
+    case UVM_IOCTL_IS_8_SUPPORTED:
+      syscall_state.reg_parameter<uvm_is_8_supported_t>(3, OUT);
+      return PREVENT_SWITCH;
+
+    case UVM_IOCTL_PAGEABLE_MEM_ACCESS:
+      syscall_state.reg_parameter<uvm_pageable_mem_access_t>(3, OUT);
+      return PREVENT_SWITCH;
+
   }
 
   /* In ioctl language, "_IOC_READ" means "outparam".  Both
@@ -1382,7 +1396,6 @@ static Switchable prepare_ioctl(RecordTask* t,
     case IOCTL_MASK_SIZE(NVRM_IOCTL_CARD_INFO):
     case IOCTL_MASK_SIZE(NVRM_IOCTL_ENV_INFO):
     case IOCTL_MASK_SIZE(NVRM_IOCTL_DESTROY):
-    case IOCTL_MASK_SIZE(NVRM_IOCTL_CALL):
     case IOCTL_MASK_SIZE(NVRM_IOCTL_MEMORY):
     case IOCTL_MASK_SIZE(NVRM_IOCTL_HOST_MAP):
     case IOCTL_MASK_SIZE(NVRM_IOCTL_HOST_UNMAP):
@@ -1430,11 +1443,21 @@ static Switchable prepare_ioctl(RecordTask* t,
       return PREVENT_SWITCH;
     }
 
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_CALL): {
+      auto argsp =
+          syscall_state.reg_parameter<typename Arch::nvrm_ioctl_call>(3, IN_OUT);
+      auto args = t->read_mem(argsp);
+      syscall_state.mem_ptr_parameter(REMOTE_PTR_FIELD(argsp, addr),
+                                      args.size);
+      return PREVENT_SWITCH;
+    }
+
     case IOCTL_MASK_SIZE(NVRM_IOCTL_CREATE): {
       auto argsp =
-          syscall_state.reg_parameter<typename Arch::nvrm_ioctl_create>(3, IN);
-      // TODO: does data size differ based on cls argument?
-      syscall_state.mem_ptr_parameter_inferred(REMOTE_PTR_FIELD(argsp, data));
+          syscall_state.reg_parameter<typename Arch::nvrm_ioctl_create>(3, IN_OUT);
+      // NOTE: context objects are 32 bytes on NV40 and 16 bytes on NV30 and earlier
+      syscall_state.mem_ptr_parameter(REMOTE_PTR_FIELD(argsp, addr),
+                                      32);
       return PREVENT_SWITCH;
     }
   }
