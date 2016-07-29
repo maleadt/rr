@@ -64,7 +64,7 @@
 #include "TraceStream.h"
 #include "VirtualPerfCounterMonitor.h"
 #include "drm.h"
-#include "nvrm.h"
+#include "nvidia/nvrm.h"
 #include "ftrace.h"
 #include "kernel_abi.h"
 #include "kernel_metadata.h"
@@ -1387,8 +1387,8 @@ static Switchable prepare_ioctl(RecordTask* t,
     case IOCTL_MASK_SIZE(NVRM_IOCTL_HOST_MAP):
     case IOCTL_MASK_SIZE(NVRM_IOCTL_HOST_UNMAP):
     case IOCTL_MASK_SIZE(NVRM_IOCTL_UNK5E):   // contains ptr
-    case IOCTL_MASK_SIZE(NVRM_IOCTL_CREATE_OS_EVENT):
-    case IOCTL_MASK_SIZE(NVRM_IOCTL_DESTROY_OS_EVENT):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_ALLOC_OS_EVENT):
+    case IOCTL_MASK_SIZE(NVRM_IOCTL_FREE_OS_EVENT):
       syscall_state.reg_parameter(3, size, IN_OUT);
       return PREVENT_SWITCH;
 
